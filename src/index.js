@@ -16,10 +16,8 @@ const bot = new Telegraf(token, {
   telegram: { agent: socksAgent },
 });
 
-bot.start((ctx) => ctx.reply('Welcome!'));
-bot.help((ctx) => ctx.reply('Send me a sticker'));
-bot.on('sticker', (ctx) => ctx.reply('👍'));
-bot.hears('hi', (ctx) => ctx.reply('Hey there'));
+bot.start((ctx) => ctx.reply('Welcome! Send me a sticker))'));
+bot.on('sticker', (ctx) => ctx.reply('Thanks, have a good night ❤'));
 bot.launch();
 
 console.log('server is running on http://localhost:4000');
