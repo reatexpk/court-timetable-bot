@@ -1,45 +1,25 @@
 require('dotenv').config();
-const TelegramBot = require('node-telegram-bot-api');
+const Telegraf = require('telegraf');
 
-const token = process.env.API_TOKEN;
-const proxyHost = process.env.PROXY_HOST;
-const proxyPort = process.env.PROXY_PORT;
-const proxyUser = process.env.PROXY_USER;
-const proxyPassword = process.env.PROXY_PASSWORD;
+const SocksAgent = require('socks5-https-client/lib/Agent');
 
-const config = {
-  polling: true,
-  request: {
-    proxy: `http://${proxyUser}:${proxyPassword}@${proxyHost}:${proxyPort}`,
-    strictSSL: false,
-  },
-};
-console.log(config);
-
-const bot = new TelegramBot(token, config);
-
-bot.on('message', (msg) => {
-  console.log(msg);
+const socksAgent = new SocksAgent({
+  socksHost: process.env.PROXY_HOST,
+  socksPort: process.env.PROXY_PORT,
+  // socksUsername: process.env.PROXY_USER,
+  // socksPassword: process.env.PROXY_PASSWORD,
 });
 
-// // Matches "/echo [whatever]"
-// bot.onText(/\/echo (.+)/, (msg, match) => {
-//   // 'msg' is the received Message from Telegram
-//   // 'match' is the result of executing the regexp above on the text content
-//   // of the message
+const token = process.env.API_TOKEN;
 
-//   const chatId = msg.chat.id;
-//   const resp = match[1]; // the captured "whatever"
+const bot = new Telegraf(token, {
+  telegram: { agent: socksAgent },
+});
 
-//   // send back the matched "whatever" to the chat
-//   bot.sendMessage(chatId, resp);
-// });
+bot.start((ctx) => ctx.reply('Welcome!'));
+bot.help((ctx) => ctx.reply('Send me a sticker'));
+bot.on('sticker', (ctx) => ctx.reply('👍'));
+bot.hears('hi', (ctx) => ctx.reply('Hey there'));
+bot.launch();
 
-// // Listen for any kind of message. There are different kinds of
-// // messages.
-// bot.on('message', (msg) => {
-//   const chatId = msg.chat.id;
-
-//   // send a message to the chat acknowledging receipt of their message
-//   bot.sendMessage(chatId, 'Received your message');
-// });
+console.log('server is running on http://localhost:4000');
