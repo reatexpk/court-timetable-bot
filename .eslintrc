@@ -14,7 +14,8 @@
         "arrowParens": "always"
       }
     ],
-    "max-len": ["error", 80]
+    "max-len": ["error", 100],
+    "no-use-before-define": 0
   },
   "env": {
     "node": true
