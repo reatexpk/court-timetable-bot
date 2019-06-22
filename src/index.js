@@ -10,7 +10,11 @@ const { leave } = Stage;
 
 const selectDate = new Scene('selectDate');
 selectDate.enter(async (ctx) => {
-  console.log('someone is using this bot');
+  console.log(
+    `${ctx.message.from.last_name} ${
+      ctx.message.from.first_name
+    } is using this bot`,
+  );
   const options = {
     reply_markup: JSON.stringify({
       keyboard: [
