@@ -22,26 +22,29 @@ selectDate.enter((ctx) => {
   };
   ctx.telegram.sendMessage(ctx.message.chat.id, 'Выбери дату ниже', options);
 });
-selectDate.on('message', (ctx) => {
+selectDate.on('message', async (ctx) => {
   if (ctx.message.text === 'Вчера') {
     ctx.session.selectedDate = dayjs()
       .subtract(1, 'day')
       .toISOString();
-  }
-  if (ctx.message.text === 'Сегодня') {
+    ctx.scene.enter('selectCourt');
+  } else if (ctx.message.text === 'Сегодня') {
     ctx.session.selectedDate = dayjs().toISOString();
-  }
-  if (ctx.message.text === 'Завтра') {
+    ctx.scene.enter('selectCourt');
+  } else if (ctx.message.text === 'Завтра') {
     ctx.session.selectedDate = dayjs()
       .add(1, 'day')
       .toISOString();
-  }
-  if (ctx.message.text === 'Послезавтра') {
+    ctx.scene.enter('selectCourt');
+  } else if (ctx.message.text === 'Послезавтра') {
     ctx.session.selectedDate = dayjs()
       .add(2, 'day')
       .toISOString();
+    ctx.scene.enter('selectCourt');
+  } else {
+    await ctx.reply('Команда не распознана');
+    ctx.scene.reenter();
   }
-  ctx.scene.enter('selectCourt');
   // if (ctx.message.text.match(/^\d\d.\d\d.\d\d\d\d$/g)) {
   //   showData(ctx);
   // }
@@ -81,6 +84,11 @@ selectCourt.on('message', async (ctx) => {
       )}, суд: ${ctx.message.text}`,
     );
     await showData(ctx);
+    ctx.scene.enter('selectDate');
+  } else if (ctx.message.text === 'Выбрать другую дату') {
+    ctx.scene.enter('selectDate');
+  } else {
+    ctx.reply('Команда не распознана');
     ctx.scene.enter('selectDate');
   }
 });
