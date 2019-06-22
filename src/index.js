@@ -9,7 +9,8 @@ const dayjs = require('dayjs');
 const { leave } = Stage;
 
 const selectDate = new Scene('selectDate');
-selectDate.enter((ctx) => {
+selectDate.enter(async (ctx) => {
+  console.log('someone is using this bot');
   const options = {
     reply_markup: JSON.stringify({
       keyboard: [
@@ -20,7 +21,11 @@ selectDate.enter((ctx) => {
       resize_keyboard: true,
     }),
   };
-  ctx.telegram.sendMessage(ctx.message.chat.id, 'Выбери дату ниже', options);
+  await ctx.telegram.sendMessage(
+    ctx.message.chat.id,
+    'Выбери дату ниже',
+    options,
+  );
 });
 selectDate.on('message', async (ctx) => {
   if (ctx.message.text === 'Вчера') {
@@ -41,8 +46,9 @@ selectDate.on('message', async (ctx) => {
       .add(2, 'day')
       .toISOString();
     ctx.scene.enter('selectCourt');
+  } else if (ctx.message.text === '/start') {
+    ctx.scene.reenter();
   } else {
-    await ctx.reply('Команда не распознана');
     ctx.scene.reenter();
   }
   // if (ctx.message.text.match(/^\d\d.\d\d.\d\d\d\d$/g)) {
@@ -107,10 +113,17 @@ bot.start((ctx) => ctx.scene.enter('selectDate'));
 bot.startPolling();
 
 async function showData(ctx) {
+  console.log(
+    `Запрашиваем данные за ${dayjs(ctx.session.selectedDate).format(
+      'DD.MM.YYYY',
+    )}, суд: ${ctx.session.court}`,
+  );
   const data = await fetchData({
     date: dayjs(ctx.session.selectedDate).format('DD.MM.YYYY'),
     court: ctx.session.court,
   });
+
+  console.log(data);
 
   if (!data) {
     await ctx.reply(
