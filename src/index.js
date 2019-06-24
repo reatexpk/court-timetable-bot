@@ -5,15 +5,20 @@ const session = require('telegraf/session');
 const Stage = require('telegraf/stage');
 const Scene = require('telegraf/scenes/base');
 const dayjs = require('dayjs');
+const fs = require('fs');
 
 const { leave } = Stage;
 
 const selectDate = new Scene('selectDate');
 selectDate.enter(async (ctx) => {
-  console.log(
-    `${ctx.message.from.last_name} ${
-      ctx.message.from.first_name
-    } is using this bot`,
+  await fs.appendFile(
+    './log.log',
+    `${ctx.message.from.last_name} ${ctx.message.from.first_name} nickname: ${
+      ctx.message.from.username
+    }\n`,
+    () => {
+      // console.log('file updated');
+    },
   );
   const options = {
     reply_markup: JSON.stringify({
@@ -114,6 +119,7 @@ const bot = require('./initBot')();
 bot.use(session());
 bot.use(stage.middleware());
 bot.start((ctx) => ctx.scene.enter('selectDate'));
+bot.on('message', (ctx) => ctx.scene.enter('selectDate'));
 bot.startPolling();
 
 async function showData(ctx) {
@@ -238,7 +244,7 @@ function getUrlByCourtName(court) {
       return 'https://leninskyeka--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
     }
     case 'Железнодорожный': {
-      return 'https://zheleznodorozhny--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=2';
+      return 'https://zheleznodorozhny--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
     }
     case 'Кировский': {
       return 'https://kirovsky--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
