@@ -13,9 +13,8 @@ const selectDate = new Scene('selectDate');
 selectDate.enter(async (ctx) => {
   await fs.appendFile(
     './log.log',
-    `${ctx.message.from.last_name} ${ctx.message.from.first_name} nickname: ${
-      ctx.message.from.username
-    }\n`,
+    `[${dayjs().format('DD-MM-YYYY hh:mm:ss')}]: ${ctx.message.from.last_name ||
+      ''} ${ctx.message.from.first_name || ''} @${ctx.message.from.username}\n`,
     () => {
       // console.log('file updated');
     },
