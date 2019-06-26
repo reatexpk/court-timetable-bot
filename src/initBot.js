@@ -1,10 +1,11 @@
 require('dotenv').config();
 const SocksAgent = require('socks5-https-client/lib/Agent');
 const Telegraf = require('telegraf');
+const config = require('./config');
 
-function initBot(useProxy = false) {
+function initBot() {
   let bot;
-  if (useProxy) {
+  if (config.useProxy) {
     const socksAgent = new SocksAgent({
       socksHost: process.env.PROXY_HOST,
       socksPort: process.env.PROXY_PORT,

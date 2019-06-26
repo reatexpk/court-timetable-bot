@@ -7,6 +7,8 @@ const Scene = require('telegraf/scenes/base');
 const dayjs = require('dayjs');
 const fs = require('fs');
 
+const config = require('./config');
+
 const { leave } = Stage;
 
 const selectDate = new Scene('selectDate');
@@ -72,6 +74,7 @@ const courts = [
   'Октябрьский',
   'Чкаловский',
   'Орджоникидзевский',
+  'Областной',
 ];
 
 const selectCourt = new Scene('selectCourt');
@@ -82,7 +85,8 @@ selectCourt.enter((ctx) => {
         ['Верх-Исетский', 'Ленинский'],
         ['Железнодорожный', 'Кировский'],
         ['Октябрьский', 'Чкаловский'],
-        ['Орджоникидзевский', 'Выбрать другую дату'],
+        ['Орджоникидзевский', 'Областной'],
+        ['Выбрать другую дату'],
       ],
       resize_keyboard: true,
     }),
@@ -150,13 +154,16 @@ async function showData(ctx) {
     'DD.MM.YYYY',
   )}*\n\n`;
 
-  data.forEach(({ caseNumber, time, judge, link, info }) => {
-    replyString +=
-      `ФИО: ${getPersonName(info)}\n` +
-      `Номер дела: [${caseNumber}](${link})\n` +
-      `Время расcмотрения: ${time}\n` +
-      `Судья: ${judge}\n\n`;
-  });
+  data.forEach(
+    ({ caseNumber, time, judge, link, info, room = 'Нет данных' }) => {
+      replyString +=
+        `ФИО: ${getPersonName(info)}\n` +
+        `Номер дела: [${caseNumber}](${link})\n` +
+        `Время расcмотрения: ${time}\n` +
+        `Комната: ${room}\n` +
+        `Судья: ${judge}\n\n`;
+    },
+  );
   await ctx.telegram.sendMessage(ctx.message.chat.id, replyString, {
     parse_mode: 'markdown',
   });
@@ -184,24 +191,31 @@ async function fetchData({ date, court }) {
       );
     });
 
+    const currentConfig =
+      court === 'Областной'
+        ? config.reginalCourtParseConfig
+        : config.districtCourtsParseConfig;
     const $ = cheerio.load(html, { decodeEntities: false });
-    $('div#resultTable table tbody tr').each((i, elem) => {
+    $(currentConfig.selector).each((i, elem) => {
       if ($(elem).find('td').length !== 1) {
         const children = $(elem).children();
         const orderNumber = children
-          .eq(0)
+          .eq(currentConfig.orderNumberCol)
           .text()
           .replace('.', '');
-        const caseNumber = children.eq(1).text();
+        const caseNumber = children.eq(currentConfig.caseNumberCol).text();
         const link = `${url}${children
-          .eq(1)
+          .eq(currentConfig.caseNumberCol)
           .find('a')
           .attr('href')}`;
-        const time = children.eq(2).text();
-        const event = children.eq(3).text();
-        const room = children.eq(4).text();
-        const info = children.eq(5).text();
-        const judge = children.eq(6).text();
+        const time = children.eq(currentConfig.timeCol).text();
+        const event = children.eq(currentConfig.eventCol).text();
+        const room = children.eq(currentConfig.roomCol).text();
+        const info = children
+          .eq(currentConfig.infoCol)
+          .text()
+          .replace('ПРАВОНАРУШЕНИЕ: ', '');
+        const judge = children.eq(currentConfig.judgeCol).text();
 
         data.push({
           orderNumber,
@@ -225,8 +239,7 @@ async function fetchData({ date, court }) {
 
 function filterDataByArticle(data) {
   return data.filter((elem) => {
-    const regexp = /20.2 /g;
-    return regexp.test(elem.info);
+    return config.regExp.test(elem.info);
   });
 }
 
@@ -256,6 +269,9 @@ function getUrlByCourtName(court) {
     }
     case 'Орджоникидзевский': {
       return 'https://ordzhonikidzevsky--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
+    }
+    case 'Областной': {
+      return 'https://oblsud--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1&name_op=hl';
     }
     default: {
       throw new Error('Invalid court name');
