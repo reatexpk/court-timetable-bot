@@ -259,7 +259,7 @@ function getUrlByCourtName(court) {
       return 'https://zheleznodorozhny--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
     }
     case 'Кировский': {
-      return 'https://kirovsky--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
+      return 'https://kirovsky--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=2';
     }
     case 'Октябрьский': {
       return 'https://oktiabrsky--svd.sudrf.ru/modules.php?name=sud_delo&srv_num=1';
