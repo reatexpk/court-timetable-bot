@@ -193,7 +193,7 @@ async function fetchData({ date, court }) {
 
     const currentConfig =
       court === 'Областной'
-        ? config.reginalCourtParseConfig
+        ? config.regionalCourtParseConfig
         : config.districtCourtsParseConfig;
     const $ = cheerio.load(html, { decodeEntities: false });
     $(currentConfig.selector).each((i, elem) => {

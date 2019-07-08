@@ -9,7 +9,7 @@ const districtCourtsParseConfig = {
   selector: 'div#resultTable table tbody tr',
 };
 
-const reginalCourtParseConfig = {
+const regionalCourtParseConfig = {
   orderNumberCol: 0,
   caseNumberCol: 1,
   timeCol: 2,
@@ -27,5 +27,5 @@ module.exports = {
   useProxy,
   regExp,
   districtCourtsParseConfig,
-  reginalCourtParseConfig,
+  regionalCourtParseConfig,
 };
