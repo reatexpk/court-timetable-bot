@@ -19,7 +19,7 @@ const regionalCourtParseConfig = {
   selector: 'div#tablcont table tbody tr',
 };
 
-const regExp = /КоАП: ст. 20.2/g;
+const regExp = /КоАП: ст. 20.2 /g;
 
 const useProxy = false;
 
