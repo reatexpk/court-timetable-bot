@@ -139,7 +139,7 @@ async function showData(ctx) {
       .add(5, 'hour')
       .format('DD-MM-YYYY hh:mm:ss')}]: Запрашиваем данные, суд: ${
       ctx.session.court
-    }`,
+    }\n`,
     () => {
       // console.log('file updated');
     },
@@ -157,7 +157,7 @@ async function showData(ctx) {
     `[${dayjs()
       .utc()
       .add(5, 'hour')
-      .format('DD-MM-YYYY hh:mm:ss')}]: ${JSON.stringify(data)}`,
+      .format('DD-MM-YYYY hh:mm:ss')}]: ${JSON.stringify(data)}\n`,
     () => {
       // console.log('file updated');
     },
