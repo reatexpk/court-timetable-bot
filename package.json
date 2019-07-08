@@ -5,7 +5,8 @@
   "author": "reatexpk <reatexpk1@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "nodemon src/index.js localhost 4000"
+    "start": "nodemon src/index.js localhost 4000",
+    "up": "pm2 start ./start.sh"
   },
   "devDependencies": {
     "babel-eslint": "^10.0.1",
