@@ -19,6 +19,7 @@ selectDate.enter(async (ctx) => {
     './log.log',
     `[${dayjs()
       .utc()
+      .add(5, 'hour')
       .format('DD-MM-YYYY hh:mm:ss')}]: ${ctx.message.from.last_name ||
       ''} ${ctx.message.from.first_name || ''} @${ctx.message.from.username}\n`,
     () => {
@@ -44,29 +45,20 @@ selectDate.enter(async (ctx) => {
 selectDate.on('message', async (ctx) => {
   if (ctx.message.text === 'Вчера') {
     ctx.session.selectedDate = dayjs()
-      .utc()
       .subtract(1, 'day')
-      .add(5, 'hour')
       .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === 'Сегодня') {
-    ctx.session.selectedDate = dayjs()
-      .utc()
-      .add(5, 'hour')
-      .toISOString();
+    ctx.session.selectedDate = dayjs().toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === 'Завтра') {
     ctx.session.selectedDate = dayjs()
-      .utc()
       .add(1, 'day')
-      .add(5, 'hour')
       .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === 'Послезавтра') {
     ctx.session.selectedDate = dayjs()
-      .utc()
       .add(2, 'day')
-      .add(5, 'hour')
       .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === '/start') {
@@ -110,9 +102,10 @@ selectCourt.on('message', async (ctx) => {
   if (courts.includes(ctx.message.text)) {
     ctx.session.court = ctx.message.text;
     await ctx.reply(
-      `Запрашиваю данные на ${dayjs(ctx.session.selectedDate).format(
-        'DD.MM.YYYY',
-      )}, суд: ${ctx.message.text}`,
+      `Запрашиваю данные на ${dayjs(ctx.session.selectedDate)
+        .utc()
+        .add(5, 'hour')
+        .format('DD.MM.YYYY')}, суд: ${ctx.message.text}`,
     );
     await showData(ctx);
     ctx.scene.enter('selectDate');
@@ -139,17 +132,36 @@ bot.on('message', (ctx) => ctx.scene.enter('selectDate'));
 bot.startPolling();
 
 async function showData(ctx) {
-  console.log(
-    `Запрашиваем данные за ${dayjs(ctx.session.selectedDate).format(
-      'DD.MM.YYYY',
-    )}, суд: ${ctx.session.court}`,
+  await fs.appendFile(
+    './log.log',
+    `[${dayjs()
+      .utc()
+      .add(5, 'hour')
+      .format('DD-MM-YYYY hh:mm:ss')}]: Запрашиваем данные, суд: ${
+      ctx.session.court
+    }`,
+    () => {
+      // console.log('file updated');
+    },
   );
   const data = await fetchData({
-    date: dayjs(ctx.session.selectedDate).format('DD.MM.YYYY'),
+    date: dayjs(ctx.session.selectedDate)
+      .utc()
+      .add(5, 'hour')
+      .format('DD.MM.YYYY'),
     court: ctx.session.court,
   });
 
-  console.log(data);
+  await fs.appendFile(
+    './log.log',
+    `[${dayjs()
+      .utc()
+      .add(5, 'hour')
+      .format('DD-MM-YYYY hh:mm:ss')}]: ${JSON.stringify(data)}`,
+    () => {
+      // console.log('file updated');
+    },
+  );
 
   if (!data) {
     await ctx.reply(
@@ -163,12 +175,20 @@ async function showData(ctx) {
     return;
   }
 
-  let replyString = `*Данные суда на ${dayjs(ctx.session.selectedDate).format(
-    'DD.MM.YYYY',
-  )}*\n\n`;
+  let replyString = `*Данные суда на ${dayjs(ctx.session.selectedDate)
+    .utc()
+    .add(5, 'hour')
+    .format('DD.MM.YYYY')}*\n\n`;
 
   data.forEach(
-    ({ caseNumber, time, judge, link, info, room = 'Нет данных' }) => {
+    ({
+      caseNumber,
+      time,
+      judge = 'Нет данных',
+      link,
+      info,
+      room = 'Нет данных',
+    }) => {
       replyString +=
         `ФИО: ${getPersonName(info)}\n` +
         `Номер дела: [${caseNumber}](${link})\n` +

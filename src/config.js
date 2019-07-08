@@ -21,7 +21,7 @@ const regionalCourtParseConfig = {
 
 const regExp = /КоАП: ст. 20.2 /g;
 
-const useProxy = false;
+const useProxy = true;
 
 module.exports = {
   useProxy,
