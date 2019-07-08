@@ -5,9 +5,11 @@ const session = require('telegraf/session');
 const Stage = require('telegraf/stage');
 const Scene = require('telegraf/scenes/base');
 const dayjs = require('dayjs');
+const utc = require('dayjs/plugin/utc');
 const fs = require('fs');
-
 const config = require('./config');
+
+dayjs.extend(utc);
 
 const { leave } = Stage;
 
@@ -15,7 +17,9 @@ const selectDate = new Scene('selectDate');
 selectDate.enter(async (ctx) => {
   await fs.appendFile(
     './log.log',
-    `[${dayjs().format('DD-MM-YYYY hh:mm:ss')}]: ${ctx.message.from.last_name ||
+    `[${dayjs()
+      .utc()
+      .format('DD-MM-YYYY hh:mm:ss')}]: ${ctx.message.from.last_name ||
       ''} ${ctx.message.from.first_name || ''} @${ctx.message.from.username}\n`,
     () => {
       // console.log('file updated');
@@ -40,20 +44,29 @@ selectDate.enter(async (ctx) => {
 selectDate.on('message', async (ctx) => {
   if (ctx.message.text === 'Вчера') {
     ctx.session.selectedDate = dayjs()
+      .utc()
       .subtract(1, 'day')
+      .add(5, 'hour')
       .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === 'Сегодня') {
-    ctx.session.selectedDate = dayjs().toISOString();
+    ctx.session.selectedDate = dayjs()
+      .utc()
+      .add(5, 'hour')
+      .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === 'Завтра') {
     ctx.session.selectedDate = dayjs()
+      .utc()
       .add(1, 'day')
+      .add(5, 'hour')
       .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === 'Послезавтра') {
     ctx.session.selectedDate = dayjs()
+      .utc()
       .add(2, 'day')
+      .add(5, 'hour')
       .toISOString();
     ctx.scene.enter('selectCourt');
   } else if (ctx.message.text === '/start') {
