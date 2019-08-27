@@ -229,7 +229,7 @@ async function fetchData({ date, court }) {
         ? config.regionalCourtParseConfig
         : config.districtCourtsParseConfig;
     const $ = cheerio.load(html, { decodeEntities: false });
-    $(currentConfig.selector).each((i, elem) => {
+    $(currentConfig.selector).each(async (i, elem) => {
       if ($(elem).find('td').length !== 1) {
         const children = $(elem).children();
         const orderNumber = children
@@ -250,6 +250,10 @@ async function fetchData({ date, court }) {
           .replace('ПРАВОНАРУШЕНИЕ: ', '');
         const judge = children.eq(currentConfig.judgeCol).text();
 
+        if (!config.regExp.test(info)) {
+          return;
+        }
+
         data.push({
           orderNumber,
           caseNumber,
@@ -267,13 +271,7 @@ async function fetchData({ date, court }) {
     return undefined;
   }
 
-  return filterDataByArticle(data);
-}
-
-function filterDataByArticle(data) {
-  return data.filter((elem) => {
-    return config.regExp.test(elem.info);
-  });
+  return data;
 }
 
 function getPersonName(string) {
